@@ -35,18 +35,41 @@ const todosLosDatos = [
     '🧠 *DATO:* Jeff Bezos invirtió millones en startups de blockchain y Web3.',
     '🧠 *DATO:* La guerra comercial entre potencias afecta directamente al mercado cripto.',
     '🧠 *DATO:* Mark Zuckerberg planea integrar criptopagos en todas las apps de Meta.',
-    '🧠 *DATO:* Los gobiernos de 130 países están desarrollando sus propias CBDC.'
+    '🧠 *DATO:* Los gobiernos de 130 países están desarrollando sus propias CBDC.',
+    '🧠 *DATO:* En conflictos bélicos, Bitcoin ha servido como refugio financiero.',
+    '🧠 *DATO:* Las sanciones económicas aumentan la adopción de criptomonedas.',
+    '🧠 *DATO:* Durante guerras, el oro y Bitcoin suelen subir de valor.',
+    '🧠 *DATO:* La ONU explora blockchain para ayuda humanitaria en zonas de conflicto.',
+    '🧠 *DATO:* Los presidentes de potencias mundiales mueven mercados con cada declaración.'
 ];
+
+function generarAnalisisGuerra(titulo) {
+    const t = titulo.toLowerCase();
+    if (t.includes('ucrania') || t.includes('rusia')) return '⚠️ *Conflicto Ucrania-Rusia:* Escalada de tensiones. Impacto directo en energía y materias primas. BTC tiende a subir como refugio.';
+    if (t.includes('gaza') || t.includes('israel') || t.includes('palestina')) return '🔴 *Crisis en Gaza:* Tensión en Medio Oriente. El petróleo sube, las criptomonedas reaccionan con volatilidad.';
+    if (t.includes('nuclear') || t.includes('amenaza')) return '☢️ *Amenaza Nuclear:* Riesgo máximo para mercados globales. Refugio en oro y BTC.';
+    if (t.includes('presidente') || t.includes('declaracion')) return '🏛️ *Declaración Presidencial:* Palabras que mueven mercados. Impacto inmediato en divisas y cripto.';
+    if (t.includes('otan') || t.includes('nato')) return '🛡️ *OTAN en alerta:* Movimientos militares afectan la confianza global. Cripto como alternativa.';
+    if (t.includes('paz') || t.includes('peace') || t.includes('guerra') || t.includes('war')) return '🕊️ *Paz en riesgo:* Cada conflicto redefine la economía mundial. Bitcoin como activo de protección.';
+    return '🌍 *Geopolítica Mundial:* Cada declaración y conflicto impacta directamente en los mercados financieros y criptomonedas.';
+}
 
 async function publicarNoticia() {
     const fuentes = [
-        'bitcoin cryptocurrency market today',
-        'geopolitics world news today',
-        'telegram pavel durov latest',
-        'elon musk crypto news today',
-        'world economy inflation 2026',
-        'central bank digital currency news',
-        'blockchain technology latest'
+        'war conflict ukraine russia latest',
+        'israel palestine gaza war update',
+        'middle east conflict latest news',
+        'president speech declaration today',
+        'world leader statement geopolitics',
+        'united nations security council latest',
+        'nato latest statement declaration',
+        'global peace threat latest',
+        'nuclear threat world security',
+        'international conflict diplomacy',
+        'cryptocurrency war impact economy',
+        'bitcoin safe haven war conflict',
+        'sanctions economy impact latest',
+        'global market war reaction'
     ];
     
     const query = fuentes[Math.floor(Math.random() * fuentes.length)];
@@ -82,14 +105,14 @@ async function publicarNoticia() {
                     '📝 ' + (contenido || descripcion).slice(0, 800) + '\n\n' +
                     '━'.repeat(35) + '\n' +
                     '📊 *ANÁLISIS DE IMPACTO:*\n\n' +
+                    generarAnalisisGuerra(titulo) + '\n\n' +
                     '🔹 *Criptomonedas:* Posible volatilidad en BTC y ETH.\n' +
-                    '🔹 *Mercados:* Movimiento esperado en pares principales.\n' +
                     '🔹 *Recomendación:* Mantener stop loss ajustado.\n\n' +
                     '━'.repeat(35) + '\n' +
                     '📅 ' + fecha + '\n' +
                     '📡 ' + fuente + '\n' +
                     '🤖 @Angel_Trader_Robot\n\n' +
-                    '#NoticiasDeAltoImpacto #Geopolítica #Cripto';
+                    '#NoticiasDeAltoImpacto #Geopolítica #Cripto #Guerras';
                 
                 if (imagen) {
                     try {
@@ -112,15 +135,10 @@ async function publicarNoticia() {
 
 async function publicarDatoCurioso() {
     const disponibles = todosLosDatos.filter((d, i) => !datosUsados.includes(i));
-    
-    if (disponibles.length === 0) {
-        datosUsados = [];
-        guardar();
-    }
+    if (disponibles.length === 0) { datosUsados = []; guardar(); }
     
     const idx = Math.floor(Math.random() * todosLosDatos.length);
     if (datosUsados.includes(idx)) return;
-    
     datosUsados.push(idx);
     guardar();
     
@@ -130,12 +148,12 @@ async function publicarDatoCurioso() {
         todosLosDatos[idx] + '\n\n' +
         '━'.repeat(35) + '\n' +
         '🤖 @Angel_Trader_Robot\n' +
-        '#DatosCuriosos #Cripto',
+        '#DatosCuriosos #Cripto #Geopolítica',
         { parse_mode: 'Markdown' }
     );
 }
 
-console.log('📰 BOT DE NOTICIAS DE ALTO IMPACTO INICIADO');
+console.log('📰 BOT DE NOTICIAS DE ALTO IMPACTO - GUERRAS Y GEOPOLÍTICA');
 publicarNoticia();
 setInterval(publicarNoticia, 25 * 60 * 1000);
 setInterval(publicarDatoCurioso, 45 * 60 * 1000);
