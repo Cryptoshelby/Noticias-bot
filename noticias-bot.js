@@ -56,20 +56,14 @@ function generarAnalisisGuerra(titulo) {
 
 async function publicarNoticia() {
     const fuentes = [
-        'war conflict ukraine russia latest',
-        'israel palestine gaza war update',
-        'middle east conflict latest news',
-        'president speech declaration today',
-        'world leader statement geopolitics',
-        'united nations security council latest',
-        'nato latest statement declaration',
-        'global peace threat latest',
-        'nuclear threat world security',
-        'international conflict diplomacy',
-        'cryptocurrency war impact economy',
-        'bitcoin safe haven war conflict',
-        'sanctions economy impact latest',
-        'global market war reaction'
+        'war conflict today',
+        'president speech today',
+        'world peace threat',
+        'geopolitics news',
+        'cryptocurrency news',
+        'global market today',
+        'bitcoin price news',
+        'telegram update'
     ];
     
     const query = fuentes[Math.floor(Math.random() * fuentes.length)];
@@ -77,7 +71,7 @@ async function publicarNoticia() {
     try {
         const hoy = new Date().toISOString().split('T')[0];
         const res = await axios.get(
-            `https://newsapi.org/v2/everything?q=${query}&language=es&sortBy=publishedAt&from=${hoy}&pageSize=5&apiKey=${NEWSAPI_KEY}`,
+            `https://newsapi.org/v2/everything?q=${query}&sortBy=publishedAt&from=${hoy}&pageSize=5&apiKey=${NEWSAPI_KEY}`,
             { timeout: 15000 }
         );
         
@@ -110,9 +104,8 @@ async function publicarNoticia() {
                     '🔹 *Recomendación:* Mantener stop loss ajustado.\n\n' +
                     '━'.repeat(35) + '\n' +
                     '📅 ' + fecha + '\n' +
-                    '📡 ' + fuente + '\n' +
-                    '🤖 @Angel_Trader_Robot\n\n' +
-                    '#NoticiasDeAltoImpacto #Geopolítica #Cripto #Guerras';
+                    '📡 ' + fuente + '\n\n' +
+                    '#NoticiasDeAltoImpacto #Geopolítica #Cripto';
                 
                 if (imagen) {
                     try {
@@ -147,7 +140,6 @@ async function publicarDatoCurioso() {
         '━'.repeat(35) + '\n\n' +
         todosLosDatos[idx] + '\n\n' +
         '━'.repeat(35) + '\n' +
-        '🤖 @Angel_Trader_Robot\n' +
         '#DatosCuriosos #Cripto #Geopolítica',
         { parse_mode: 'Markdown' }
     );
