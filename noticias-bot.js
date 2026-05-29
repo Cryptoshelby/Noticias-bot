@@ -170,7 +170,7 @@ console.log('📰 BOT NOTICIAS - GEOPOLÍTICA | CRIPTO | TELEGRAM');
 publicarNoticiaGeo();
 publicarNoticiaCripto();
 publicarTelegram();
-setInterval(publicarNoticiaGeo, 20 * 60 * 1000);
+setInterval(publicarNoticiaGeo, 15 * 60 * 1000);
 setInterval(publicarNoticiaCripto, 30 * 60 * 1000);
 setInterval(publicarTelegram, 40 * 60 * 1000);
 
