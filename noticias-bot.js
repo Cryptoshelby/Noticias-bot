@@ -13,7 +13,7 @@ let publicadas = [];
 try { publicadas = JSON.parse(fs.readFileSync('publicadas.json', 'utf8')); } catch(e) { publicadas = []; }
 function guardar() { fs.writeFileSync('publicadas.json', JSON.stringify(publicadas)); }
 
-const dominiosGeo = 'cnn.com,foxnews.com,nytimes.com,bbc.com,reuters.com,apnews.com,aljazeera.com,theguardian.com,washingtonpost.com,wsj.com,abc.net.au,cbc.ca,france24.com,dw.com,spiegel.de,elpais.com,lemonde.fr,ansa.it,efe.com';
+const dominiosGeo = 'cnn.com,foxnews.com,nytimes.com,bbc.com,reuters.com,apnews.com,aljazeera.com,theguardian.com,washingtonpost.com,wsj.com,abc.net.au,cbc.ca,france24.com,dw.com,spiegel.de,elpais.com,lemonde.fr,ansa.it,efe.com,ndtv.com,hindustantimes.com,japantimes.co.jp,koreatimes.co.kr,straitstimes.com,globo.com,eluniversal.com.mx,clarin.com,telesurtv.net,rt.com';
 const dominiosCripto = 'coindesk.com,cointelegraph.com,decrypt.co,theblock.co,bitcoinmagazine.com,cryptoslate.com,beincrypto.com,newsbtc.com';
 
 async function publicarNoticiaGeo() {
@@ -51,7 +51,7 @@ async function publicarNoticiaGeo() {
                     '📝 ' + contenido.slice(0, 900) + '\n\n' +
                     '━'.repeat(35) + '\n' +
                     '📅 ' + fecha + '\n' +
-                    '📡 ' + fuente + '\n\n' +
+                    '📡 Fuente internacional' + '\n\n' +
                     '#ÚltimaHora #Geopolítica #Guerras';
                 
                 if (imagen) {
@@ -101,7 +101,7 @@ async function publicarNoticiaCripto() {
                     '📝 ' + contenido.slice(0, 900) + '\n\n' +
                     '━'.repeat(35) + '\n' +
                     '📅 ' + fecha + '\n' +
-                    '📡 ' + fuente + '\n\n' +
+                    '📡 Fuente internacional' + '\n\n' +
                     '#Cripto #Bitcoin #Blockchain';
                 
                 if (imagen) {
@@ -151,7 +151,7 @@ async function publicarTelegram() {
                     '📝 ' + contenido.slice(0, 900) + '\n\n' +
                     '━'.repeat(35) + '\n' +
                     '📅 ' + fecha + '\n' +
-                    '📡 ' + fuente + '\n\n' +
+                    '📡 Fuente internacional' + '\n\n' +
                     '#Telegram #PavelDurov #Tech';
                 
                 if (imagen) {
