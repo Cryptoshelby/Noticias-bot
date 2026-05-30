@@ -3,7 +3,7 @@ const axios = require('axios');
 const fs = require('fs');
 const http = require('http');
 
-const TOKEN = '8383642654:AAFC3MnUGqvSzfgHRkyLpbuw46epKvfMb10';
+const TOKEN = "8811728164:AAFUxZVijzxDzx9r1_IkrJKpPdEg4ipqd40";
 const CANAL_NOTICIAS = '-1003778336135';
 const NEWSAPI_KEY = '8c54f27258564b4aa1c4a1a991011ee8';
 
