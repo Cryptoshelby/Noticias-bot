@@ -5,8 +5,10 @@ const http = require('http');
 
 const TOKEN = '8811728164:AAFUxZVijzxDzx9r1_IkrJKpPdEg4ipqd40';
 const CANAL_NOTICIAS = '-1003778336135';
+const URL = 'https://noticias-bot-ggco.onrender.com';
 
-const bot = new TelegramBot(TOKEN, { polling: true });
+const bot = new TelegramBot(TOKEN);
+bot.setWebHook(URL + '/bot' + TOKEN);
 
 let publicadas = [];
 try { publicadas = JSON.parse(fs.readFileSync('publicadas.json', 'utf8')); } catch(e) { publicadas = []; }
@@ -75,9 +77,8 @@ async function publicarNoticiaGeo() {
     }
 }
 
-console.log('📰 BOT NOTICIAS - REDDIT 14 SUBS');
+console.log('📰 BOT NOTICIAS - WEBHOOK');
 publicarNoticiaGeo();
 setInterval(publicarNoticiaGeo, 5 * 60 * 1000);
 
-const PORT = process.env.PORT || 3000;
-http.createServer((req, res) => { res.end('OK'); }).listen(PORT);
+http.createServer((req, res) => { res.end('OK'); }).listen(process.env.PORT || 3000);
