@@ -13,13 +13,17 @@ try { publicadas = JSON.parse(fs.readFileSync('publicadas.json', 'utf8')); } cat
 function guardar() { fs.writeFileSync('publicadas.json', JSON.stringify(publicadas)); }
 
 async function publicarNoticiaGeo() {
-    const subs = ['worldnews', 'geopolitics', 'news', 'worldpolitics'];
+    const subs = [
+        'worldnews', 'geopolitics', 'news', 'worldpolitics', 'internationalnews',
+        'globaltalk', 'war', 'conflict', 'politics', 'worldevents',
+        'ForeignPolicy', 'IRstudies', 'GlobalDevelopment', 'WorldConflicts'
+    ];
     const sub = subs[Math.floor(Math.random() * subs.length)];
     
     try {
-        const res = await axios.get(`https://www.reddit.com/r/${sub}/hot.json?limit=10`, {
+        const res = await axios.get(`https://www.reddit.com/r/${sub}/hot.json?limit=15`, {
             headers: { 'User-Agent': 'NoticiasBot/1.0' },
-            timeout: 10000
+            timeout: 15000
         });
         
         const posts = res.data?.data?.children || [];
@@ -63,12 +67,17 @@ async function publicarNoticiaGeo() {
             console.log('🌍 Geo: ' + titulo.slice(0, 50));
             return;
         }
-    } catch(e) { console.log('⚠️ Reddit:', e.message); }
+    } catch(e) {
+        if (e.response?.status === 429) {
+            console.log('⚠️ Límite Reddit, esperando...');
+            await new Promise(r => setTimeout(r, 60000));
+        }
+    }
 }
 
-console.log('📰 BOT NOTICIAS - REDDIT SIN LÍMITES');
+console.log('📰 BOT NOTICIAS - REDDIT 14 SUBS');
 publicarNoticiaGeo();
-setInterval(publicarNoticiaGeo, 15 * 60 * 1000);
+setInterval(publicarNoticiaGeo, 5 * 60 * 1000);
 
 const PORT = process.env.PORT || 3000;
 http.createServer((req, res) => { res.end('OK'); }).listen(PORT);
