@@ -23,7 +23,7 @@ async function publicarNoticiaGeo() {
     const sub = subs[Math.floor(Math.random() * subs.length)];
     
     try {
-        const res = await axios.get(`https://www.reddit.com/r/${sub}/hot.json?limit=15`, {
+        const res = await axios.get(`https://www.reddit.com/r/${sub}/hot.json?limit=25`, {
             headers: { 'User-Agent': 'NoticiasBot/1.0' },
             timeout: 15000
         });
@@ -79,6 +79,6 @@ async function publicarNoticiaGeo() {
 
 console.log('📰 BOT NOTICIAS - WEBHOOK');
 publicarNoticiaGeo();
-setInterval(publicarNoticiaGeo, 5 * 60 * 1000);
+setInterval(publicarNoticiaGeo, 15 * 60 * 1000);
 
 http.createServer((req, res) => { res.end('OK'); }).listen(process.env.PORT || 3000);
