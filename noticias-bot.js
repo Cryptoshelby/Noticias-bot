@@ -10,8 +10,6 @@ const bot = new TelegramBot(TOKEN);
 bot.setWebHook('https://noticias-bot-ggco.onrender.com/bot' + TOKEN);
 
 let publicadas = [];
-try { publicadas = JSON.parse(fs.readFileSync('publicadas.json', 'utf8')); } catch(e) { publicadas = []; }
-function guardar() { fs.writeFileSync('publicadas.json', JSON.stringify(publicadas)); }
 
 const emojis = {
     'BBC': '🇬🇧', 'CNN': '🔴', 'Reuters': '📡', 'AP News': '📰', 'NYT': '🗞️',
@@ -40,7 +38,6 @@ function publicarNoticia() {
                 
                 if (publicadas.includes(link) || !titulo) continue;
                 publicadas.push(link);
-                guardar();
                 
                 let descRaw = (item.match(/<description>(.*?)<\/description>/) || [])[1] || '';
                 descRaw = descRaw.replace(/<ol>[\s\S]*?<\/ol>/g, '');
