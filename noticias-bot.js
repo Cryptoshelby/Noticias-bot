@@ -15,6 +15,7 @@ try { publicadas = JSON.parse(fs.readFileSync('publicadas.json', 'utf8')); } cat
 function guardar() { fs.writeFileSync('publicadas.json', JSON.stringify(publicadas)); }
 
 async function publicarNoticiaGeo() {
+    console.log("🔍 Buscando noticias...");
     const subs = [
         'worldnews', 'geopolitics', 'news', 'worldpolitics', 'internationalnews',
         'globaltalk', 'war', 'conflict', 'politics', 'worldevents',
