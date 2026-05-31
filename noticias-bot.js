@@ -75,7 +75,7 @@ function publicarNoticia() {
 }
 
 console.log('📰 BOT NOTICIAS');
-publicarNoticia();
+setTimeout(() => publicarNoticia(), 5000);
 console.log("Primera llamada ejecutada");
 setInterval(publicarNoticia, 15 * 60 * 1000);
 
