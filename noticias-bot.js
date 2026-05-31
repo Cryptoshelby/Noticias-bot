@@ -13,26 +13,8 @@ let publicadas = [];
 try { publicadas = JSON.parse(fs.readFileSync('publicadas.json', 'utf8')); } catch(e) { publicadas = []; }
 function guardar() { fs.writeFileSync('publicadas.json', JSON.stringify(publicadas)); }
 
-const emojisFuente = {
-    'CNN': '🔴', 'BBC': '🇬🇧', 'Reuters': '🔴', 'AP News': '📡', 'Fox News': '🟠',
-    'NYT': '🗞️', 'Washington Post': '📰', 'The Guardian': '🛡️', 'Al Jazeera': '🌍',
-    'CNBC': '💹', 'Bloomberg': '📊', 'TechCrunch': '💻', 'The Verge': '📱',
-    'ESPN': '⚽', 'NBC': '🦚', 'ABC': '🔺', 'CBS': '👁️', 'Politico': '🏛️',
-    'NPR': '🎙️', 'USA Today': '🗞️', 'Time': '⏰', 'Forbes': '💰',
-    'Business Insider': '📈', 'Wired': '🔌', 'Ars Technica': '⚙️', 'Engadget': '🎮',
-    'Gizmodo': '🤖', 'Mashable': '🌐', 'BuzzFeed': '🐝', 'Vice': '🔄',
-    'Vox': '📢', 'Axios': '⚡', 'The Hill': '🏛️', 'Daily Mail': '📧',
-    'Mirror': '🪞', 'The Sun': '☀️', 'Metro': '🚇', 'Sky News': '🌤️',
-    'RT': '🇷🇺', 'Telesur': '🌎', 'Telegram': '💬', 'default': '📰'
-};
-
-function limpiar(texto) {
-    return texto.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim();
-}
-
-function extraerFuentes(descripcion) {
-    const fuentes = descripcion.match(/>([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)<\/a>/g) || [];
-    return [...new Set(fuentes.map(f => f.replace(/[<>\/a]/g, '').trim()))];
+function limpiar(t) {
+    return t.replace(/<[^>]*>/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim();
 }
 
 function publicarNoticia() {
@@ -41,52 +23,40 @@ function publicarNoticia() {
         res.on('data', chunk => data += chunk);
         res.on('end', async () => {
             const items = data.match(/<item>([\s\S]*?)<\/item>/g) || [];
-            if (items.length === 0) return;
-            
             for (let item of items) {
                 const titulo = limpiar((item.match(/<title>(.*?)<\/title>/) || [])[1] || '');
                 const link = (item.match(/<link>(.*?)<\/link>/) || [])[1] || '';
-                let desc = limpiar((item.match(/<description>(.*?)<\/description>/) || [])[1] || '');
+                const fuente = limpiar((item.match(/<source.*?>(.*?)<\/source>/) || [])[1] || 'Google News');
                 
                 if (publicadas.includes(link) || !titulo) continue;
                 publicadas.push(link);
-                if (publicadas.length > 500) publicadas = publicadas.slice(-500);
                 guardar();
                 
-                // Limpiar descripción
-                desc = desc.replace(/https?:\/\/\S+/g, '').replace(/\s+/g, ' ').trim();
+                // Extraer descripción SIN HTML
+                let desc = (item.match(/<description>(.*?)<\/description>/) || [])[1] || '';
+                desc = limpiar(desc).replace(/https?:\/\/\S+/g, '').trim();
                 
-                // Extraer fuentes
-                const fuentesRaw = extraerFuentes((item.match(/<description>(.*?)<\/description>/) || [])[1] || '');
-                const fuentes = fuentesRaw.length > 0 ? fuentesRaw : [(item.match(/<source.*?>(.*?)<\/source>/) || [])[1] || 'Google News'];
+                // Extraer fuentes con links reales
+                const liMatches = item.match(/<li>.*?<a href="(https:\/\/[^"]+)".*?>([^<]+)<\/a>.*?<font[^>]*>([^<]+)<\/font>/g) || [];
+                const botones = [];
+                liMatches.forEach(li => {
+                    const url = (li.match(/href="(https:\/\/[^"]+)"/) || [])[1];
+                    const nombre = (li.match(/<font[^>]*>([^<]+)<\/font>/) || [])[1];
+                    if (url && nombre) botones.push({ text: nombre, url: url });
+                });
+                if (botones.length === 0) botones.push({ text: fuente, url: link });
                 
-                const fecha = new Date((item.match(/<pubDate>(.*?)<\/pubDate>/) || [])[1] || Date.now()).toLocaleDateString('es-ES', {
+                const fecha = new Date().toLocaleDateString('es-ES', {
                     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
                 });
                 
-                // Construir mensaje
-                let mensaje = '📡 *' + titulo + '*\n\n';
-                mensaje += '📝 ' + desc.slice(0, 500) + '...\n\n';
-                mensaje += '📅 ' + fecha + '\n\n';
+                const msg = '📡 *' + titulo + '*\n\n📝 ' + desc.slice(0, 500) + '...\n\n📅 ' + fecha;
                 
-                // Agregar fuentes con emojis
-                const linksFuentes = [];
-                const linksExtraidos = (item.match(/<li>.*?href="(https:\/\/[^"]+)".*?<\/li>/g) || []);
-                
-                fuentes.forEach((fuente, i) => {
-                    const emoji = emojisFuente[fuente] || emojisFuente['default'];
-                    let linkFuente = link;
-                    if (linksExtraidos[i]) {
-                        const match = linksExtraidos[i].match(/href="(https:\/\/[^"]+)"/);
-                        if (match) linkFuente = match[1];
-                    }
-                    linksFuentes.push(emoji + ' [' + fuente + '](' + linkFuente + ')');
+                await bot.sendMessage(CANAL_NOTICIAS, msg, {
+                    parse_mode: 'Markdown',
+                    reply_markup: { inline_keyboard: [botones.slice(0, 4)] }
                 });
                 
-                mensaje += linksFuentes.join(' | ') + '\n\n';
-                mensaje += '#ÚltimaHora #Noticias';
-                
-                await bot.sendMessage(CANAL_NOTICIAS, mensaje, { parse_mode: 'Markdown', disable_web_page_preview: false });
                 console.log('📰 ' + titulo.slice(0, 50));
                 return;
             }
@@ -94,7 +64,7 @@ function publicarNoticia() {
     }).on('error', (e) => console.log('Error:', e.message));
 }
 
-console.log('📰 BOT NOTICIAS PROFESIONAL');
+console.log('📰 BOT NOTICIAS');
 publicarNoticia();
 setInterval(publicarNoticia, 15 * 60 * 1000);
 
