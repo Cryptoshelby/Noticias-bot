@@ -76,6 +76,7 @@ function publicarNoticia() {
 
 console.log('📰 BOT NOTICIAS');
 publicarNoticia();
+console.log("Primera llamada ejecutada");
 setInterval(publicarNoticia, 15 * 60 * 1000);
 
 http.createServer((req, res) => { res.end('OK'); }).listen(process.env.PORT || 3000);
