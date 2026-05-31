@@ -19,10 +19,21 @@ const emojis = ['🌍', '⚡', '🔥', '📰', '🗞️', '📡', '⚠️', '�
 async function publicarNoticia() {
     try {
         const hoy = new Date().toISOString().split('T')[0];
-        const res = await axios.get(
-            `https://newsapi.org/v2/everything?domains=cnn.com,foxnews.com,nytimes.com,bbc.com,reuters.com,apnews.com,aljazeera.com,theguardian.com,washingtonpost.com,wsj.com,telesurtv.net,rt.com&sortBy=publishedAt&from=${hoy}&pageSize=10&apiKey=${NEWSAPI_KEY}`,
-            { timeout: 15000 }
-        );
+        
+        // Intentar fuentes oficiales primero
+        let res;
+        try {
+            res = await axios.get(
+                `https://newsapi.org/v2/everything?domains=cnn.com,foxnews.com,nytimes.com,bbc.com,reuters.com,apnews.com,aljazeera.com,theguardian.com,washingtonpost.com,wsj.com,telesurtv.net,rt.com&sortBy=publishedAt&from=${hoy}&pageSize=10&apiKey=${NEWSAPI_KEY}`,
+                { timeout: 10000 }
+            );
+        } catch(e) {
+            // Si falla, usar top-headlines
+            res = await axios.get(
+                `https://newsapi.org/v2/top-headlines?country=us&pageSize=10&apiKey=${NEWSAPI_KEY}`,
+                { timeout: 10000 }
+            );
+        }
         
         if (res.data?.articles?.length > 0) {
             for (let articulo of res.data.articles) {
@@ -47,7 +58,7 @@ async function publicarNoticia() {
                     '📅 ' + new Date(articulo.publishedAt).toLocaleDateString('es-ES', { 
                         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
                     }) + '\n\n' +
-                    '#ÚltimaHora #Geopolítica ' + e;
+                    '#ÚltimaHora ' + e;
                 
                 if (imagen) {
                     try { await bot.sendPhoto(CANAL_NOTICIAS, imagen, { caption: mensaje, parse_mode: 'Markdown' }); } 
@@ -64,7 +75,7 @@ async function publicarNoticia() {
     } catch(e) { console.log('⚠️ Error:', e.message); }
 }
 
-console.log('📰 BOT NOTICIAS - 24 FUENTES OFICIALES');
+console.log('📰 BOT NOTICIAS - DOBLE API');
 publicarNoticia();
 setInterval(publicarNoticia, 25 * 60 * 1000);
 
