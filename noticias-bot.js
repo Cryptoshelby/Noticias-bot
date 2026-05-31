@@ -13,9 +13,19 @@ let publicadas = [];
 try { publicadas = JSON.parse(fs.readFileSync('publicadas.json', 'utf8')); } catch(e) { publicadas = []; }
 function guardar() { fs.writeFileSync('publicadas.json', JSON.stringify(publicadas)); }
 
-function limpiar(t) {
-    return t.replace(/<[^>]*>/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim();
-}
+const emojis = {
+    'BBC': '🇬🇧', 'CNN': '🔴', 'Reuters': '📡', 'AP News': '📰', 'NYT': '🗞️',
+    'Fox News': '🟠', 'Al Jazeera': '🌍', 'The Guardian': '🛡️', 'CNBC': '💹',
+    'Bloomberg': '📊', 'TechCrunch': '💻', 'The Verge': '📱', 'ESPN': '⚽',
+    'NBC': '🦚', 'ABC': '🔺', 'CBS': '👁️', 'Politico': '🏛️', 'NPR': '🎙️',
+    'USA Today': '🗞️', 'Time': '⏰', 'Forbes': '💰', 'Wired': '🔌',
+    'Ars Technica': '⚙️', 'Engadget': '🎮', 'Gizmodo': '🤖', 'Mashable': '🌐',
+    'BuzzFeed': '🐝', 'Vice': '🔄', 'Vox': '📢', 'Axios': '⚡',
+    'The Hill': '🏛️', 'Daily Mail': '📧', 'Mirror': '🪞', 'The Sun': '☀️',
+    'Metro': '🚇', 'Sky News': '🌤️', 'RT': '🇷🇺', 'Telesur': '🌎',
+    'Facebook': '🟦', 'Twitter': '🐦', 'Instagram': '📸', 'YouTube': '▶️',
+    'LinkedIn': '💼', 'TikTok': '🎵', 'Reddit': '🤖', 'Telegram': '💬'
+};
 
 function publicarNoticia() {
     https.get('https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en', (res) => {
@@ -24,39 +34,42 @@ function publicarNoticia() {
         res.on('end', async () => {
             const items = data.match(/<item>([\s\S]*?)<\/item>/g) || [];
             for (let item of items) {
-                const titulo = limpiar((item.match(/<title>(.*?)<\/title>/) || [])[1] || '');
+                const titulo = (item.match(/<title>(.*?)<\/title>/) || [])[1]?.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').trim() || '';
                 const link = (item.match(/<link>(.*?)<\/link>/) || [])[1] || '';
-                const fuente = limpiar((item.match(/<source.*?>(.*?)<\/source>/) || [])[1] || 'Google News');
+                const fuente = (item.match(/<source.*?>(.*?)<\/source>/) || [])[1]?.replace(/<[^>]*>/g, '').trim() || 'Google News';
                 
                 if (publicadas.includes(link) || !titulo) continue;
                 publicadas.push(link);
                 guardar();
                 
-                // Extraer descripción SIN HTML
-                let desc = (item.match(/<description>(.*?)<\/description>/) || [])[1] || '';
-                desc = limpiar(desc).replace(/https?:\/\/\S+/g, '').trim();
+                let descRaw = (item.match(/<description>(.*?)<\/description>/) || [])[1] || '';
+                descRaw = descRaw.replace(/<ol>[\s\S]*?<\/ol>/g, '');
+                let desc = descRaw.replace(/<[^>]*>/g, ' ').replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').trim();
                 
-                // Extraer fuentes con links reales
                 const liMatches = item.match(/<li>.*?<a href="(https:\/\/[^"]+)".*?>([^<]+)<\/a>.*?<font[^>]*>([^<]+)<\/font>/g) || [];
-                const botones = [];
-                liMatches.forEach(li => {
+                let fuentesTexto = '';
+                liMatches.slice(0, 5).forEach(li => {
                     const url = (li.match(/href="(https:\/\/[^"]+)"/) || [])[1];
                     const nombre = (li.match(/<font[^>]*>([^<]+)<\/font>/) || [])[1];
-                    if (url && nombre) botones.push({ text: nombre, url: url });
+                    if (url && nombre) {
+                        const emoji = emojis[nombre] || '📡';
+                        fuentesTexto += emoji + ' [' + nombre + '](' + url + ') | ';
+                    }
                 });
-                if (botones.length === 0) botones.push({ text: fuente, url: link });
+                if (!fuentesTexto) {
+                    const emoji = emojis[fuente] || '📰';
+                    fuentesTexto = emoji + ' [' + fuente + '](' + link + ')';
+                } else {
+                    fuentesTexto = fuentesTexto.slice(0, -3);
+                }
                 
                 const fecha = new Date().toLocaleDateString('es-ES', {
                     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
                 });
                 
-                const msg = '📡 *' + titulo + '*\n\n📝 ' + desc.slice(0, 500) + '...\n\n📅 ' + fecha;
+                const msg = '📰 *' + titulo + '*\n\n📝 ' + desc.slice(0, 500) + '...\n\n📅 ' + fecha + '\n\n🔗 ' + fuentesTexto;
                 
-                await bot.sendMessage(CANAL_NOTICIAS, msg, {
-                    parse_mode: 'Markdown',
-                    reply_markup: { inline_keyboard: [botones.slice(0, 4)] }
-                });
-                
+                await bot.sendMessage(CANAL_NOTICIAS, msg, { parse_mode: 'Markdown', disable_web_page_preview: true });
                 console.log('📰 ' + titulo.slice(0, 50));
                 return;
             }
