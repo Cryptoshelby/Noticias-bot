@@ -14,11 +14,13 @@ let publicadas = [];
 try { publicadas = JSON.parse(fs.readFileSync('publicadas.json', 'utf8')); } catch(e) { publicadas = []; }
 function guardar() { fs.writeFileSync('publicadas.json', JSON.stringify(publicadas)); }
 
+const emojis = ['🌍', '⚡', '🔥', '📰', '🗞️', '📡', '⚠️', '🔴', '🟠', '🟡', '💥', '🚨', '📢', '🔊', '👁️'];
+
 async function publicarNoticia() {
     try {
         const hoy = new Date().toISOString().split('T')[0];
         const res = await axios.get(
-            `https://newsapi.org/v2/everything?domains=cnn.com,foxnews.com,nytimes.com,bbc.com,reuters.com,apnews.com,aljazeera.com,theguardian.com,washingtonpost.com,wsj.com,telesurtv.net,rt.com&sortBy=publishedAt&pageSize=5&apiKey=${NEWSAPI_KEY}`,
+            `https://newsapi.org/v2/everything?domains=cnn.com,foxnews.com,nytimes.com,bbc.com,reuters.com,apnews.com,aljazeera.com,theguardian.com,washingtonpost.com,wsj.com,telesurtv.net,rt.com&sortBy=publishedAt&from=${hoy}&pageSize=10&apiKey=${NEWSAPI_KEY}`,
             { timeout: 15000 }
         );
         
@@ -26,22 +28,26 @@ async function publicarNoticia() {
             for (let articulo of res.data.articles) {
                 const id = articulo.url || articulo.title;
                 if (publicadas.includes(id)) continue;
+                if (!articulo.title || !articulo.description) continue;
                 
                 publicadas.push(id);
                 guardar();
                 
                 const titulo = articulo.title;
-                const contenido = articulo.description || articulo.content || titulo;
+                const contenido = articulo.content || articulo.description;
                 const imagen = articulo.urlToImage;
+                const e = emojis[Math.floor(Math.random() * emojis.length)];
                 
                 const mensaje = 
-                    '⚡ *ULTIMA HORA* ⚡\n' +
+                    e + ' *ÚLTIMA HORA* ' + e + '\n' +
                     '━'.repeat(35) + '\n\n' +
                     '📰 *' + titulo + '*\n\n' +
                     '📝 ' + contenido.slice(0, 900) + '\n\n' +
                     '━'.repeat(35) + '\n' +
-                    '📡 ' + (articulo.source?.name || 'Fuente internacional') + '\n\n' +
-                    '#UltimaHora';
+                    '📅 ' + new Date(articulo.publishedAt).toLocaleDateString('es-ES', { 
+                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    }) + '\n\n' +
+                    '#ÚltimaHora #Geopolítica ' + e;
                 
                 if (imagen) {
                     try { await bot.sendPhoto(CANAL_NOTICIAS, imagen, { caption: mensaje, parse_mode: 'Markdown' }); } 
@@ -58,8 +64,8 @@ async function publicarNoticia() {
     } catch(e) { console.log('⚠️ Error:', e.message); }
 }
 
-console.log('📰 BOT NOTICIAS ACTIVO');
+console.log('📰 BOT NOTICIAS - 24 FUENTES OFICIALES');
 publicarNoticia();
-setInterval(publicarNoticia, 30 * 60 * 1000);
+setInterval(publicarNoticia, 25 * 60 * 1000);
 
 http.createServer((req, res) => { res.end('OK'); }).listen(process.env.PORT || 3000);
