@@ -30,7 +30,7 @@ async function publicarNoticia() {
         } catch(e) {
             // Si falla, usar top-headlines
             res = await axios.get(
-                `https://newsapi.org/v2/top-headlines?country=us&pageSize=10&apiKey=${NEWSAPI_KEY}`,
+                `https://newsapi.org/v2/top-headlines?language=en&pageSize=10&apiKey=${NEWSAPI_KEY}`,
                 { timeout: 10000 }
             );
         }
