@@ -1,6 +1,5 @@
 const TelegramBot = require('node-telegram-bot-api');
 const axios = require('axios');
-const fs = require('fs');
 const http = require('http');
 
 const TOKEN = '8383642654:AAFC3MnUGqvSzfgHRkyLpbuw46epKvfMb10';
@@ -10,73 +9,28 @@ const NEWSAPI_KEY = '8c54f27258564b4aa1c4a1a991011ee8';
 const bot = new TelegramBot(TOKEN);
 bot.setWebHook('https://noticias-bot-ggco.onrender.com/bot' + TOKEN);
 
-let publicadas = [];
-try { publicadas = JSON.parse(fs.readFileSync('publicadas.json', 'utf8')); } catch(e) { publicadas = []; }
-function guardar() { fs.writeFileSync('publicadas.json', JSON.stringify(publicadas)); }
-
-const emojis = ['🌍', '⚡', '🔥', '📰', '🗞️', '📡', '⚠️', '🔴', '🟠', '🟡', '💥', '🚨', '📢', '🔊', '👁️'];
-
 async function publicarNoticia() {
     try {
-        const hoy = new Date().toISOString().split('T')[0];
-        
-        // Intentar fuentes oficiales primero
-        let res;
-        try {
-            res = await axios.get(
-                `https://newsapi.org/v2/everything?domains=cnn.com,foxnews.com,nytimes.com,bbc.com,reuters.com,apnews.com,aljazeera.com,theguardian.com,washingtonpost.com,wsj.com,telesurtv.net,rt.com&sortBy=publishedAt&from=${hoy}&pageSize=10&apiKey=${NEWSAPI_KEY}`,
-                { timeout: 10000 }
-            );
-        } catch(e) {
-            // Si falla, usar top-headlines
-            res = await axios.get(
-                `https://newsapi.org/v2/top-headlines?language=en&pageSize=10&apiKey=${NEWSAPI_KEY}`,
-                { timeout: 10000 }
-            );
-        }
+        const res = await axios.get(
+            `https://newsapi.org/v2/top-headlines?language=en&pageSize=5&apiKey=${NEWSAPI_KEY}`,
+            { timeout: 10000 }
+        );
         
         if (res.data?.articles?.length > 0) {
-            for (let articulo of res.data.articles) {
-                const id = articulo.url || articulo.title;
-                if (publicadas.includes(id)) continue;
-                if (!articulo.title || !articulo.description) continue;
-                
-                publicadas.push(id);
-                guardar();
-                
-                const titulo = articulo.title;
-                const contenido = articulo.content || articulo.description;
-                const imagen = articulo.urlToImage;
-                const e = emojis[Math.floor(Math.random() * emojis.length)];
-                
-                const mensaje = 
-                    e + ' *ÚLTIMA HORA* ' + e + '\n' +
-                    '━'.repeat(35) + '\n\n' +
-                    '📰 *' + titulo + '*\n\n' +
-                    '📝 ' + contenido.slice(0, 900) + '\n\n' +
-                    '━'.repeat(35) + '\n' +
-                    '📅 ' + new Date(articulo.publishedAt).toLocaleDateString('es-ES', { 
-                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                    }) + '\n\n' +
-                    '#ÚltimaHora ' + e;
-                
-                if (imagen) {
-                    try { await bot.sendPhoto(CANAL_NOTICIAS, imagen, { caption: mensaje, parse_mode: 'Markdown' }); } 
-                    catch(e) { await bot.sendMessage(CANAL_NOTICIAS, mensaje, { parse_mode: 'Markdown' }); }
-                } else {
-                    await bot.sendMessage(CANAL_NOTICIAS, mensaje, { parse_mode: 'Markdown' });
-                }
-                
-                console.log('📰 Publicada: ' + titulo.slice(0, 50));
-                return;
-            }
+            const a = res.data.articles[0];
+            const msg = '⚡ *ULTIMA HORA* ⚡\n' + '━'.repeat(35) + '\n\n' +
+                '📰 *' + a.title + '*\n\n' +
+                '📝 ' + (a.description || a.content || '').slice(0, 900) + '\n\n' +
+                '━'.repeat(35) + '\n#UltimaHora';
+            
+            await bot.sendMessage(CANAL_NOTICIAS, msg, { parse_mode: 'Markdown' });
+            console.log('📰 Publicada: ' + a.title.slice(0, 50));
         }
-        console.log('⚠️ Sin noticias nuevas.');
-    } catch(e) { console.log('⚠️ Error:', e.message); }
+    } catch(e) { console.log('Error:', e.message); }
 }
 
-console.log('📰 BOT NOTICIAS - DOBLE API');
+console.log('📰 BOT NOTICIAS');
 publicarNoticia();
-setInterval(publicarNoticia, 25 * 60 * 1000);
+setInterval(publicarNoticia, 20 * 60 * 1000);
 
 http.createServer((req, res) => { res.end('OK'); }).listen(process.env.PORT || 3000);
