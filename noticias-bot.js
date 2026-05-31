@@ -28,7 +28,7 @@ const emojis = {
 };
 
 function publicarNoticia() {
-    https.get('https://news.google.com/rss?hl=en-UShl=en-US&gl=US&ceid=US:engl=UShl=en-US&gl=US&ceid=US:enceid=US:enhl=en-US&gl=US&ceid=US:entopic=technology', (res) => {
+    https.get('https://news.google.com/rss?hl=en-UShl=en-US&gl=US&ceid=US:engl=UShl=en-US&gl=US&ceid=US:enceid=US:enhl=en-US&gl=US&ceid=US:en', (res) => {
         let data = '';
         res.on('data', chunk => data += chunk);
         res.on('end', async () => {
