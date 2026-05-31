@@ -37,7 +37,7 @@ function publicarNoticia() {
                 const fuente = (item.match(/<source.*?>(.*?)<\/source>/) || [])[1]?.replace(/<[^>]*>/g, '').trim() || 'Google News';
                 
                 if (publicadas.includes(link) || !titulo) continue;
-                publicadas.push(link);
+                // publicadas.push(link);
                 
                 let descRaw = (item.match(/<description>(.*?)<\/description>/) || [])[1] || '';
                 descRaw = descRaw.replace(/<ol>[\s\S]*?<\/ol>/g, '');
