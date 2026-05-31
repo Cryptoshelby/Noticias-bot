@@ -22,6 +22,7 @@ async function publicarNoticiaGeo() {
             { timeout: 15000 }
         );
         
+        console.log("📊 Artículos encontrados: " + res.data.articles.length);
         if (res.data?.articles?.length > 0) {
             for (let articulo of res.data.articles) {
                 const id = articulo.url || articulo.title;
