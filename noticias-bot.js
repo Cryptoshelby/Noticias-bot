@@ -18,7 +18,7 @@ async function publicarNoticiaGeo() {
     try {
         const hoy = new Date().toISOString().split('T')[0];
         const res = await axios.get(
-            `https://newsapi.org/v2/top-headlines?category=general&language=es&pageSize=5&apiKey=${NEWSAPI_KEY}`,
+            `https://newsapi.org/v2/everything?q=guerra+OR+conflicto+OR+presidentetop-headlines?category=general&language=essortBy=publishedAt&pageSize=5&apiKey=${NEWSAPI_KEY}`,
             { timeout: 15000 }
         );
         
