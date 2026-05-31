@@ -25,7 +25,7 @@ async function publicarNoticiaGeo() {
     
     try {
         const res = await axios.get(`https://www.reddit.com/r/${sub}/hot.json?limit=25`, {
-            headers: { 'User-Agent': 'NoticiasBot/1.0' },
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
             timeout: 15000
         });
         
