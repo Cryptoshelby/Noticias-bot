@@ -18,7 +18,7 @@ async function publicarNoticia() {
     try {
         const hoy = new Date().toISOString().split('T')[0];
         const res = await axios.get(
-            `https://newsapi.org/v2/top-headlines?country=us&pageSize=5&apiKey=${NEWSAPI_KEY}`,
+            `https://newsapi.org/v2/everything?domains=cnn.com,foxnews.com,nytimes.com,bbc.com,reuters.com,apnews.com,aljazeera.com,theguardian.com,washingtonpost.com,wsj.com,telesurtv.net,rt.com&sortBy=publishedAt&pageSize=5&apiKey=${NEWSAPI_KEY}`,
             { timeout: 15000 }
         );
         
