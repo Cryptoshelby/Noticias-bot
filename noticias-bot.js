@@ -64,7 +64,7 @@ async function publicarNoticiaGeo() {
     } catch(e) { console.log('⚠️ Error:', e.message); }
 }
 
-console.log('📰 BOT NOTICIAS - NEWSAPI TOP HEADLINES');
+console.log('📰 BOT NOTICIAS - NEWSAPI EVERYTHING');
 publicarNoticiaGeo();
 setInterval(publicarNoticiaGeo, 30 * 60 * 1000);
 
