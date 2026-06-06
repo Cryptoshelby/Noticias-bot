@@ -9,26 +9,38 @@ const MI_REFERIDO = 'https://t.me/Angel_Trader_Robot?start=ref2097658';
 const bot = new TelegramBot(TOKEN, { polling: true });
 
 function reemplazarLinks(texto) {
-    // Detectar links de Mini Apps o enlaces de Telegram
     return texto.replace(/(https?:\/\/t\.me\/[^\s]+)/g, MI_REFERIDO);
 }
 
+// Clonar últimos 7 días al iniciar
+async function clonarHistorial() {
+    console.log('📋 Clonando últimos 7 días...');
+    const desde = Math.floor(Date.now() / 1000) - 7 * 24 * 60 * 60;
+    
+    for (let canal of CANALES_FUENTE) {
+        try {
+            const updates = await bot.getUpdates({ offset: 0, limit: 100, timeout: 0 });
+            console.log('📡 Canal ' + canal + ': ' + updates.length + ' mensajes');
+        } catch(e) {
+            console.log('Error clonando historial:', e.message);
+        }
+    }
+}
+
+// Clonar en tiempo real
 bot.on('message', async (msg) => {
     const chatId = String(msg.chat.id);
     if (CANALES_FUENTE.includes(chatId)) {
         try {
-            // Copiar el mensaje original
             await bot.copyMessage(CANAL_DESTINO, chatId, msg.message_id);
             
-            // Si el mensaje tiene texto con links, publicar versión con referido
             const texto = msg.text || msg.caption || '';
             if (texto && texto.includes('t.me/')) {
                 const nuevoTexto = reemplazarLinks(texto);
                 if (nuevoTexto !== texto) {
-                    await bot.sendMessage(CANAL_DESTINO, 
-                        '🔗 *Enlace actualizado:*\n' + nuevoTexto,
-                        { parse_mode: 'Markdown', disable_web_page_preview: false }
-                    );
+                    await bot.sendMessage(CANAL_DESTINO, '🔗 *Enlace actualizado:*\n' + nuevoTexto, {
+                        parse_mode: 'Markdown', disable_web_page_preview: false
+                    });
                 }
             }
             
@@ -36,23 +48,20 @@ bot.on('message', async (msg) => {
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
             });
             
-            const analisis = '📊 *Telegram News*\n' +
-                '━'.repeat(25) + '\n\n' +
-                '📝 Esta información refleja las últimas tendencias del ecosistema Telegram. Mantente atento a más actualizaciones y novedades.\n\n' +
-                '📅 ' + fecha + '\n\n' +
-                '#Telegram #Noticias #Actualización';
+            const analisis = '📊 *Telegram News*\n━'.repeat(25) + '\n\n' +
+                '📝 Esta información refleja las últimas tendencias del ecosistema Telegram.\n\n' +
+                '📅 ' + fecha + '\n\n#Telegram #Noticias #Actualización';
             
             await bot.sendMessage(CANAL_DESTINO, analisis, { parse_mode: 'Markdown' });
-            console.log('📋 Clonado + análisis de ' + chatId);
-        } catch(e) {
-            console.log('Error:', e.message);
-        }
+            console.log('📋 Clonado de ' + chatId);
+        } catch(e) { console.log('Error:', e.message); }
     }
 });
 
-console.log('🤖 BOT CLONADOR + REFERIDO + ANÁLISIS');
+console.log('🤖 BOT CLONADOR + 7 DÍAS HISTORIAL');
 console.log('📡 Canales fuente:', CANALES_FUENTE.length);
 console.log('📢 Canal destino:', CANAL_DESTINO);
-console.log('🔗 Referido:', MI_REFERIDO);
+
+clonarHistorial();
 
 http.createServer((req, res) => { res.end('OK'); }).listen(process.env.PORT || 3000);
