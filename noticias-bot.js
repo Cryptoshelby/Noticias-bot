@@ -2,7 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const http = require('http');
 
 const TOKEN = '8383642654:AAFC3MnUGqvSzfgHRkyLpbuw46epKvfMb10';
-const CANALES_FUENTE = ['-1001537427825', '-1001624773544', '-1001006503122'];
+const CANALES_FUENTE = ['-1001537427825', '-1001624773544', '-1001006503122', '-1001967795413'];
 const CANAL_DESTINO = '-1003982153049';
 const MI_REFERIDO = 'https://t.me/Angel_Trader_Robot?start=ref2097658';
 
